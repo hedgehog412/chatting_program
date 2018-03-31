@@ -1,10 +1,27 @@
-from flask import Flask
+from flask import Flask, request
 app = Flask(__name__)
 
+data_storage = []
 
-@app.route('/')
+@app.route('/send-message', methods=['GET', 'POST'])
 def hello():
-    return 'Hello'
+    data = request.values
+    data_storage.append(data['msg'])
+    print data['cookie']
+    return 'Received'
+
+
+@app.route('/get-message')
+def get_message():
+    messages = ''
+    
+    for i in range(len(data_storage)):
+        msg = data_storage.pop(0)
+        messages += msg
+        messages += '||'
+
+    return messages
+
 
 @app.route('/bye')
 def bye():
@@ -12,24 +29,3 @@ def bye():
 
 
 app.run(host="0.0.0.0")
-
-
-"""
-class Server(object):
-    @classmethod
-    def register_client(cls):
-        print 'Hello client'
-
-
-    @classmethod
-    def accept_conn(cls):
-        print 'Connection accepted'
-
-
-    @classmethod  # decorator
-    def main(cls):
-        print 'Hello, I am the server'
-
-if __name__ == '__main__':
-    app.run(
-"""
