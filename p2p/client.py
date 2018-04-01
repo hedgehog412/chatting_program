@@ -9,11 +9,19 @@ class Client(object):
     HASH = ''
     USERNAME = ''
     PORT=0
+
     def __init__(self):
         self.HASH = self.generate_hash()
         # self.USERNAME = self.get_username()  TODO 
         self.PORT=int(sys.argv[1])
-        requests.post('{}/register-seed'.format(self.ENDPOINT), data={'hash':self.HASH})
+
+        if random.random() < 0.5:
+            print('Joining network as a seed')
+            resp = requests.post('{}/register-seed'.format(self.ENDPOINT), data={'hash':self.HASH, 'port': self.PORT})
+        else:
+            print('Joining network as a peer')
+            resp = requests.post('{}/join-net'.format(self.ENDPOINT), data={'hash': self.HASH, 'port': self.PORT})
+            print(resp.text)
 
 
     def generate_hash(self):
@@ -26,7 +34,8 @@ class Client(object):
         requests.post('{}/remove-seed'.format(self.ENDPOINT),data={'hash':self.HASH})
 
     def join(self):
-        seed_hash=requests.post('{}/join-net'.format(self.ENDPOINT),data={'hash':self.HASH,})
+        seed_ip=requests.post('{}/join-net'.format(self.ENDPOINT),data={'hash':self.HASH,})
+        print(seed_ip.text)
 
 if __name__=='__main__':
     c=Client()
