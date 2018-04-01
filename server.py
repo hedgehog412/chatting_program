@@ -1,22 +1,29 @@
 from flask import Flask, request
 app = Flask(__name__)
 
-data_storage = []
+data_storage = {}
 
-@app.route('/send-message', methods=['GET', 'POST'])
+@app.route('/',methods=['POST'])
+def init():
+    data=request.values
+    data_storage[data['cookie']]=[]
+    return 'okay'
+@app.route('/send-message', methods=['POST'])
 def hello():
     data = request.values
-    data_storage.append(data['msg'])
-    print data['cookie']
+        
+    for key in data_storage:
+        if key != data['cookie']:
+            data_storage[key].append(data['username']+': '+data['msg'])
     return 'Received'
 
 
-@app.route('/get-message')
+@app.route('/get-message',methods=['POST'])
 def get_message():
     messages = ''
-    
-    for i in range(len(data_storage)):
-        msg = data_storage.pop(0)
+    data = request.values
+    for i in range(len(data_storage[data['cookie']])):
+        msg = data_storage[data['cookie']].pop(0)
         messages += msg
         messages += '||'
 
