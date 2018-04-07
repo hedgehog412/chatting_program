@@ -28,8 +28,9 @@ def remove_seed():
 @app.route('/join-net', methods=['GET', 'POST'])
 def register_peer():
     idx=int(random.random()*len(SEEDS))
-    
-    _hash = SEEDS.keys()[idx]
-    return SEEDS[_hash]
+    _hash=[]
+    for key in SEEDS.keys():
+        _hash.append(key)
+    return SEEDS[_hash[idx-1]]
 
 app.run()
