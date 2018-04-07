@@ -9,6 +9,7 @@ class Client(object):
     HASH = ''
     USERNAME = ''
     PORT=0
+    PEERS=[]    
 
     def __init__(self):
         self.HASH = self.generate_hash()
@@ -22,7 +23,9 @@ class Client(object):
             print('Joining network as a peer')
             resp = requests.post('{}/join-net'.format(self.ENDPOINT), data={'hash': self.HASH, 'port': self.PORT})
             print(resp.text)
-
+            self.PEERS.append(resp.text)
+            temp='http://'+resp.text
+            requests.post('{}/meet-peers'.format(temp),data={'hash':self.HASH,'port':self.PORT})
 
     def generate_hash(self):
         _hash = ''
@@ -36,6 +39,16 @@ class Client(object):
     def join(self):
         seed_ip=requests.post('{}/join-net'.format(self.ENDPOINT),data={'hash':self.HASH,})
         print(seed_ip.text)
+
+    @app.route('/meet-peers',methods=['POST'])
+    def meet_peers(self):
+        peer_value=request.values['hash']
+        peer_port=request.values['port']
+        peer_ip=request.remote_addr
+        print('ok')
+        self.PEERS.append('{}:{}'.format(peer_ip,peer_port))
+        print(self.PEERS)
+        return 'ok'
 
 if __name__=='__main__':
     c=Client()
