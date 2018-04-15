@@ -27,6 +27,16 @@ def remove_seed():
 
 @app.route('/join-net', methods=['GET', 'POST'])
 def register_peer():
+
+    # If we don't have any SEEDS, we treat this as a request to join as seed
+    if len(SEEDS) == 0:
+        seed_value = request.values['hash']
+        seed_ip=request.remote_addr
+        seed_port = request.values['port']
+        SEEDS[seed_value] = '{}:{}'.format(seed_ip, seed_port)
+        return 'ok'
+       
+
     idx=int(random.random()*len(SEEDS))
     _hash=[]
     for key in SEEDS.keys():
