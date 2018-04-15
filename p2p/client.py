@@ -1,8 +1,7 @@
 import requests
 import sys
 import random
-from flask import Flask
-app=Flask(__name__)
+from flask import Flask, request
 
 class Client(object):
     ENDPOINT = 'http://127.0.0.1:5000'
@@ -22,6 +21,10 @@ class Client(object):
         else:
             print('Joining network as a peer')
             resp = requests.post('{}/join-net'.format(self.ENDPOINT), data={'hash': self.HASH, 'port': self.PORT})
+
+            if resp.text == 'ok':  # this means we joined the network as the seed, not peer
+                return
+
             print(resp.text)
             self.PEERS.append(resp.text)
             temp='http://'+resp.text
@@ -40,16 +43,22 @@ class Client(object):
         seed_ip=requests.post('{}/join-net'.format(self.ENDPOINT),data={'hash':self.HASH,})
         print(seed_ip.text)
 
-    @app.route('/meet-peers',methods=['POST'])
-    def meet_peers(self):
-        peer_value=request.values['hash']
-        peer_port=request.values['port']
-        peer_ip=request.remote_addr
+    def meet_peers(self, peer_value, peer_port, peer_ip):
         print('ok')
+        all_peers = str(self.PEERS)
         self.PEERS.append('{}:{}'.format(peer_ip,peer_port))
-        print(self.PEERS)
-        return 'ok'
+        return all_peers
+
+app=Flask(__name__)
+c=Client()
+
+@app.route('/meet-peers',methods=['POST'])
+def meet_peers_endpoint():
+    peer_value=request.values['hash']
+    peer_port=request.values['port']
+    peer_ip=request.remote_addr
+    return c.meet_peers(peer_value, peer_port, peer_ip)
+   
 
 if __name__=='__main__':
-    c=Client()
     app.run(host='127.0.0.1',port=c.PORT)
